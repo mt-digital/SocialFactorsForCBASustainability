@@ -1,0 +1,17 @@
+---
+title: "Pnas_figure_dev"
+
+code-fold: true
+---
+
+This is a Quarto website.
+
+To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+
+{{< lipsum 1 >}}
+
+
+![](figure_1.pdf)
+
+
+{{< lipsum 1 >}}

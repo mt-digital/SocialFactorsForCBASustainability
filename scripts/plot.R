@@ -87,16 +87,13 @@ success_over_groups_compare_maxsuccess_N <- function(supp_dir = "data/supp_netwo
     summarize(success_rate = mean(frac_a_curr_trait)) %>%
     group_by(nagents, group_w_innovation) %>%
     summarize(max_success_rate = max(success_rate))
-  print(names(aggdf))
-  # return (aggdf)
   aggdf <- rename(aggdf, start_group = group_w_innovation) 
                   # minority_group_size = min_group_frac,
                   # h_min = min_homophily, h_maj = maj_homophily)
-  # return(aggdf)
-  print(head(aggdf))
+
   aggdf$start_group <- factor(aggdf$start_group)#, level=c("Majority", "Minority", "Both"))
   aggdf$nagents <- factor(aggdf$nagents)
-  print(aggdf)
+  
   p <- ggplot(aggdf, aes(x = start_group,  #factor(start_group, level=c("Majority", "Minority", "Both")), 
                          y = max_success_rate)) + 
     geom_point(aes(color=nagents)) +
@@ -115,7 +112,13 @@ success_over_groups_jitter <- function(
     write_dir = "figures",
     write_filename = "success_over_groups_jitter.pdf",
     tbl_override = NULL,
-    this_ylim = c(NA, NA)
+    this_ylim = c(NA, NA),
+    size=1.2,   # Begin geom_jitter arguments.
+    alpha=0.1, 
+    width=0.2, 
+    color="#1b74bc", 
+    stroke=NA, 
+    ...  # provide additional geom_jitter arguments se quiser.
   ) {
 
   if (is.null(tbl_override)) {
@@ -141,20 +144,23 @@ success_over_groups_jitter <- function(
   
   # Now create boxplot with start group on x-axis, success_rate on y-axis, 
   # and color-coded by minority group size.
-  p <- ggplot(aggdf, aes(x = factor(start_group, 
+  p_ret <- ggplot(aggdf, aes(x = factor(start_group, 
                                     level=c("Majority", "Minority", "Both")), 
                          y = success_rate)) + 
     # geom_violin() + 
-    geom_jitter(alpha=0.1, width=0.2) +
-    stat_summary(fun=mean, geom="line", color="#02bec3", size=1.5, aes(group=1)) +
-    stat_summary(fun=mean, geom="point", shape=23, size=4, fill="#02bec3", stroke=1.1) +
+    geom_jitter(size=size, alpha=alpha, width=width, 
+                color=color, stroke=stroke, ...) +
+    stat_summary(fun=mean, geom="line", color="black", size=1.5, aes(group=1)) +
+    stat_summary(fun=mean, geom="point", shape="circle", #shape=23, 
+                 size=1.5, alpha=0.8, fill="black", stroke=1.1) +
     xlab("Start group") + ylab("Success rate") + 
       # ylim(this_ylim) +
     mytheme
   
+
   ggsave(write_path, width=6, height=3.75)
   
-  return (p)
+  return (p_ret)
 }
 
 line_for_jitter_legend <- function(write_path = "figures/jitter_legend_line.pdf") {
@@ -195,7 +201,6 @@ steps_over_groups_success_failure <- function(csv_dirs = c("data/main_parts"),
   }
   
   write_path <- file.path(write_dir, write_filename)
-  print(write_path)
   
   success_remap <- function(frac_a_curr_trait) {
     if (frac_a_curr_trait == 1.0)
@@ -281,8 +286,10 @@ load_from_parts <- function(csv_dirs = c("data/main_parts", "data/supp_parts"),
       }
     }
     
-    tbl_part <- files %>%
-      map_df(~read_csv(., col_select=col_select, show_col_types = FALSE))
+    tbl_part <- files %>% 
+      map_df(~read_csv(., show_col_types = FALSE))
+      # map_df(~read_csv(., col_select=col_select, show_col_types = FALSE))
+      # ^Not working currently to have col_select = NA; will have to fix for supp I think.
     
     tbl_part$group_w_innovation = group_w_innovation
     
@@ -442,7 +449,7 @@ supp_asymm_heatmaps <- function(csv_dir = "data/supp_parts",
 
 asymm_heatmap <- function(asymm_tbl, this_group_w_innovation, write_path, 
                           measure = "sustainability", 
-                          cmap_limits = c(0.0, 0.7)) {
+                          cmap_limits = c(0.0, 0.7), theme_extra = NULL, ...) {
   
   asymm_agg <- asymm_tbl %>%
     filter(min_homophily != 0.99) %>% 
@@ -455,9 +462,6 @@ asymm_heatmap <- function(asymm_tbl, this_group_w_innovation, write_path,
     #   subset(group_w_innovation == this_group_w_innovation)
   asymm_lim_agg <- asymm_agg[asymm_agg$group_w_innovation == this_group_w_innovation, ]
   
-  print(unique(asymm_lim_agg$group_w_innovation))
-  print(head(asymm_lim_agg))
-  
   if (measure == "sustainability") {
   
     asymm_max_line <-
@@ -465,7 +469,6 @@ asymm_heatmap <- function(asymm_tbl, this_group_w_innovation, write_path,
         group_by(min_homophily) %>% 
         filter(sustainability == max(sustainability))
     
-    print(asymm_max_line)
     max_sustainability <- 
       asymm_max_line[asymm_max_line$sustainability == 
                        max(asymm_max_line$sustainability), ]
@@ -475,7 +478,6 @@ asymm_heatmap <- function(asymm_tbl, this_group_w_innovation, write_path,
       group_by(min_homophily) %>% 
       filter(step == max(step))
     
-    print(asymm_max_line)
     max_sustainability <- 
       asymm_max_line[asymm_max_line$step == 
                        max(asymm_max_line$step), ]
@@ -497,7 +499,7 @@ asymm_heatmap <- function(asymm_tbl, this_group_w_innovation, write_path,
     stop("Measure not recognized.")
   }
   
-   ggplotstart + 
+  p_ret <- ggplotstart + 
     geom_tile() +
     scale_fill_gradient2(low = "#000000", mid = "#010101", high = "#FFFFFF", limits = cmap_limits) +
     geom_point(data = asymm_max_line, aes(x = min_homophily, y = maj_homophily)) +
@@ -510,8 +512,13 @@ asymm_heatmap <- function(asymm_tbl, this_group_w_innovation, write_path,
     mytheme
     
   # save_path <- file.path(write_dir, str_replace(basename(csv_loc), ".csv", ".pdf"))
+  if (!is_null(theme_extra)) { # add theme_extra to current p_ret }
+    p_ret = p_ret + theme_extra
+  }
   
-  ggsave(write_path, width = 6.75, height = 5)
+  ggsave(write_path, p_ret, width = 6.75, height = 5)
+
+  return (p_ret)
 }
 
 
@@ -651,8 +658,6 @@ calculate_reciprocity <- function(adj_mat_dir, hmin = 0.0, sync_file = "data/rec
   reciprocity_vec <- rep(0.0, nfiles)
   
   for (f_idx in 1:nfiles) {
-    # print(paste0("On file index ", f_idx))
-    print(files[f_idx])
     adjacency_matrix <- load_adjacency(files[f_idx])
     hmaj[f_idx] <- as.numeric( str_split( str_split(str_extract(files[f_idx], "hmaj=.*"), "=")[[1]][2], "_")[[1]][1] )
     

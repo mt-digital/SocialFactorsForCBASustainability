@@ -9,7 +9,7 @@ To get started, clone this repository, e.g., execute the following in the
 terminal: 
 
 ```
-git clone https://github.com/eehh-stanford/SustainableCBA.git
+git clone https://github.com/eehh-stanford/MinMaj-Adaptation-Diffusion.git
 ```
 
 After cloning the repository, install all dependencies by first starting the
@@ -21,7 +21,10 @@ julia> using Pkg; Pkg.activate("."); Pkg.instantiate()
 
 ## Unit tests
 
-We developed our model using test-driven development, which uses small, executable code snippets to confirm the model works as expected and to document model mechanics; see [`src/test/model.jl`](https://github.com/eehh-stanford/SustainableCBA/blob/main/src/test/model.jl) to view the test suite.
+We developed our model using test-driven development, which uses small,
+executable code snippets to confirm the model works as expected and to document
+model mechanics; see
+[`src/test/model.jl`](https://github.com/eehh-stanford/MinMaj-Adaptation-Diffusion/blob/main/src/test/model.jl) to view the test suite.
 
 While still in the REPL, run the unit tests to make sure all is working well:
 
@@ -60,11 +63,23 @@ parameter settings.
 
 ### Success rates and times to fixation
 
-Use `main_asymm_heatmaps` to create the main heatmap results of _success rate_ as a function of $h_\mathrm{min}$ and $h_\mathrm{maj}$, which can be found in [`scripts/plot.R`](https://github.com/eehh-stanford/SustainableCBA/blob/main/scripts/plot.R#L72). For creating the heatmaps of average time to model fixation, pass the keyword argument `measure = "step"` to `main_asymm_heatmaps`. Similarly, to create supplemental analyses use the `supp_asymm_heatmaps` function in [`scripts/plot.R`](https://github.com/eehh-stanford/SustainableCBA/blob/main/scripts/plot.R#L15).
+To make the jitterplot and means of success rate with _Start group_ condition
+on the x-axis included in Figure 1 of the 2024 manuscript, use the
+[`success_over_groups_jitter`](https://github.com/eehh-stanford/MinMaj-Adaptation-Diffusion/blob/main/scripts/plot.R#L113) function. 
+
+Use `main_asymm_heatmaps` to create the main heatmap results of _success rate_
+as a function of $h_\mathrm{min}$ and $h_\mathrm{maj}$, which can be found in
+[`scripts/plot.R`](https://github.com/eehh-stanford/MinMaj-Adaptation-Diffusion/blob/main/scripts/plot.R#L72).
+For creating the heatmaps of average time to model fixation, pass the keyword
+argument `measure = "step"` to `main_asymm_heatmaps`. Similarly, to create
+supplemental analyses use the `supp_asymm_heatmaps` function in
+[`scripts/plot.R`](https://github.com/eehh-stanford/MinMaj-Adaptation-Diffusion/blob/main/scripts/plot.R#L15).
 
 To create the heatmaps you need the output data from the simulations presented in our journal article, stored in the `data` folder in the root project directory. To get the data in the right place, first create a `data` directory, then download and unzip the two zip files in our OSF repository: https://osf.io/cd9hx/. 
 
-To create time series of individual model runs, use the `make_all_group_prevalence_comparisons` function in [`scripts/analysis.jl`](https://github.com/eehh-stanford/SustainableCBA/blob/main/scripts/analysis.jl#L290).
+To create time series of individual model runs, use the
+`make_all_group_prevalence_comparisons` function in
+[`scripts/analysis.jl`](https://github.com/eehh-stanford/MinMaj-Adaptation-Diffusion/blob/main/scripts/analysis.jl#L290).
 
 
 ### Network tie frequencies
